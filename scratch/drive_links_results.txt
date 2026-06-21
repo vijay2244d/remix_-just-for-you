@@ -1,0 +1,148 @@
+﻿Searching for Google Drive links in 67 conversation folders...
+
+Found 17 unique Google Drive file IDs:
+ID: 1gucAA7foafFlo5vGp1upxoBBvCwp4Efe (Found in folder 7eb831a1-81be-4d0f-8d37-b34aab07c95b, line 109)
+Context:
+-you\\\\src\\\\PlaylistLayout.tsx (LANGUAGE_TSX)
+Browser State:
+  Page CAE9CD8A5334B2AD61363AEF525C014F (jaalakkari trimmed 1.mp3 - Google Drive) - https://drive.google.com/file/d/1gucAA7foafFlo5vGp1upxoBBvCwp4Efe/view
+    Viewport: 1370x632, Page Height: 632
+  Page BD933CBA331E02E7A79FE7DF800347E8 (Untitled folder - Google Drive) - https://dri
+--------------------------------------------------
+ID: 1ZITMetY4nQdmi89UUkIgb5JeR2yyGpWb (Found in folder 7eb831a1-81be-4d0f-8d37-b34aab07c95b, line 109)
+Context:
+B_6Hjp2GBA
+    Viewport: 1370x632, Page Height: 632
+  Page FA107CA46F31B50B396A0200254D9C1B (mudhal nee mudivum nee trimmed 2.mp3 - Google Drive) - https://drive.google.com/file/d/1ZITMetY4nQdmi89UUkIgb5JeR2yyGpWb/view
+    Viewport: 1370x632, Page Height: 632
+  Page 877D47CFCEF3F6AF267A8D17F052461D (mudhal nee mudivum nee trimmed 1.mp3 - Google
+--------------------------------------------------
+ID: 1TIja18pTmrXARXWs53ETIXIBmfH34pwt (Found in folder 7eb831a1-81be-4d0f-8d37-b34aab07c95b, line 109)
+Context:
+yGpWb/view
+    Viewport: 1370x632, Page Height: 632
+  Page 877D47CFCEF3F6AF267A8D17F052461D (mudhal nee mudivum nee trimmed 1.mp3 - Google Drive) - https://drive.google.com/file/d/1TIja18pTmrXARXWs53ETIXIBmfH34pwt/view
+    Viewport: 1370x632, Page Height: 632
+  Page 0B99159DCCCB4247D1EADE71E54DCE30 (mayanadhi trimmed 2.mp3 - Google Drive) - htt
+--------------------------------------------------
+ID: 1sIdcCTzLltA5Qrt7XF13uA26m2y3B2em (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 36)
+Context:
+Ws53ETIXIBmfH34pwt/view
+    Viewport: 1370x632, Page Height: 632
+  Page 0B99159DCCCB4247D1EADE71E54DCE30 (mayanadhi trimmed 2.mp3 - Google Drive) - https://drive.google.com/file/d/1sIdcCTzLltA5Qrt7XF13uA26m2y3B2em/view
+    Viewport: 1370x632, Page Height: 632
+  Page 457C70A2EDB5E7D0F73B588899B11CD4 (Kannana-Kanne trim 1.mp3 - Google Drive) - ht
+--------------------------------------------------
+ID: 1hwh6N0XY6Lw-5vHIzuPcIeAAzrxpIYSq (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 36)
+Context:
+7XF13uA26m2y3B2em/view
+    Viewport: 1370x632, Page Height: 632
+  Page 457C70A2EDB5E7D0F73B588899B11CD4 (Kannana-Kanne trim 1.mp3 - Google Drive) - https://drive.google.com/file/d/1hwh6N0XY6Lw-5vHIzuPcIeAAzrxpIYSq/view
+    Viewport: 1370x632, Page Height: 632
+  Page 03293259100F3B2CCEECC5093C6A3C47 (ennai saaithale trimmed 1.mp3 
+<truncated 14
+--------------------------------------------------
+ID: 11MRQ8IKND_od6OpoQH2B2_cmaap0BUJ1 (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 36)
+Context:
+G5rxKjgWOYhCw/view
+    Viewport: 1370x632, Page Height: 632
+  Page 6F9CFF9C932309121D80131C7FCEAA99 (ennadi Mayavi trimmed 2 .mp3 - Google Drive) - https://drive.google.com/file/d/11MRQ8IKND_od6OpoQH2B2_cmaap0BUJ1/view
+    Viewport: 1370x632, Page Height: 632
+  Page EAEA9914A6222FA94BE2F4796E2E30D4 (kaadhal aada trimmed 1.mp3 - Google Drive) - 
+--------------------------------------------------
+ID: 1BSJsxCk_tlCiLRC-ghXjV_sIoCf4eX4y (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 107)
+Context:
+ if there are any instructions about how the playlist or songs are supposed to be integrated into the app.
+<truncated 4149 bytes>
+- Google Drive) - https://drive.google.com/file/d/1BSJsxCk_tlCiLRC-ghXjV_sIoCf4eX4y/view
+    Viewport: 1370x632, Page Height: 632
+  Page 695088B234D2EFA3969D74B745AF059D (kanimozhiye trimmed 1.mp3 - Google Drive) - h
+--------------------------------------------------
+ID: 149Xg8voIUd2nlOjDMQs7QTKluU1aWjEu (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 107)
+Context:
+ghXjV_sIoCf4eX4y/view
+    Viewport: 1370x632, Page Height: 632
+  Page 695088B234D2EFA3969D74B745AF059D (kanimozhiye trimmed 1.mp3 - Google Drive) - https://drive.google.com/file/d/149Xg8voIUd2nlOjDMQs7QTKluU1aWjEu/view
+    Viewport: 1370x632, Page Height: 632
+  Page FABE401020BF2A041051FD70B84AB062 (kanna kanne trim 2.mp3 - Google Drive) - http
+--------------------------------------------------
+ID: 15jufJWCA5zz0kXaklaieLPIzC4SY4Vql (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 107)
+Context:
+OjDMQs7QTKluU1aWjEu/view
+    Viewport: 1370x632, Page Height: 632
+  Page FABE401020BF2A041051FD70B84AB062 (kanna kanne trim 2.mp3 - Google Drive) - https://drive.google.com/file/d/15jufJWCA5zz0kXaklaieLPIzC4SY4Vql/view
+    Viewport: 1370x632, Page Height: 632
+  Page 116D55273060432BDB4D5BF193C144FF (maru vaarthai trimmed 2.mp3 - Google Drive) -
+--------------------------------------------------
+ID: 1aLBtpuSaZVFreSpfdBtlrJ78h5rj8CxH (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 107)
+Context:
+ieLPIzC4SY4Vql/view
+    Viewport: 1370x632, Page Height: 632
+  Page 116D55273060432BDB4D5BF193C144FF (maru vaarthai trimmed 2.mp3 - Google Drive) - https://drive.google.com/file/d/1aLBtpuSaZVFreSpfdBtlrJ78h5rj8CxH/view
+    Viewport: 1370x632, Page Height: 632
+  Page B574D55B225A95EAEB37241B2B01D31F (maru varathu trimed 1.mp3 - Google Drive) - h
+--------------------------------------------------
+ID: 17NEWeqMfm9RlpRaBy8z35DUS_kl48ybS (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 107)
+Context:
+dBtlrJ78h5rj8CxH/view
+    Viewport: 1370x632, Page Height: 632
+  Page B574D55B225A95EAEB37241B2B01D31F (maru varathu trimed 1.mp3 - Google Drive) - https://drive.google.com/file/d/17NEWeqMfm9RlpRaBy8z35DUS_kl48ybS/view
+    Viewport: 1370x632, Page Height: 632
+  Page A514DC39CEADFB89CCE47BB6E6F9DBB3 (azhagiye trimmed 1.mp3 - Google Drive) - http
+--------------------------------------------------
+ID: 153ck2hMYi1z1ba-7olz4G2c5lb-l0b6G (Found in folder 5056ef58-a8c3-4979-b00c-79dbb749d74c, line 107)
+Context:
+RaBy8z35DUS_kl48ybS/view
+    Viewport: 1370x632, Page Height: 632
+  Page A514DC39CEADFB89CCE47BB6E6F9DBB3 (azhagiye trimmed 1.mp3 - Google Drive) - https://drive.google.com/file/d/153ck2hMYi1z1ba-7olz4G2c5lb-l0b6G/view
+    Viewport: 1370x632, Page Height: 632
+  Page 798DF9B6E4F130A53500F672A02EB761 (kanna kanne trim 3.mp3 - Google Drive) - http
+--------------------------------------------------
+ID: 17I-1YZ6lbwKq_dlqJZ_4HvKHU9gjfZ1t (Found in folder 7eb831a1-81be-4d0f-8d37-b34aab07c95b, line 109)
+Context:
+a-7olz4G2c5lb-l0b6G/view
+    Viewport: 1370x632, Page Height: 632
+  Page 798DF9B6E4F130A53500F672A02EB761 (kanna kanne trim 3.mp3 - Google Drive) - https://drive.google.com/file/d/17I-1YZ6lbwKq_dlqJZ_4HvKHU9gjfZ1t/view
+    Viewport: 1370x632, Page Height: 632
+  Page 82290FC7808AE025328D2F5F9006C360 (3.mp3 - Google Drive) - https://drive.google.
+--------------------------------------------------
+ID: 1nn4F-mCo4DEKU0VCryHCpsPGmwpUo8Lw (Found in folder 7eb831a1-81be-4d0f-8d37-b34aab07c95b, line 109)
+Context:
+/d/17I-1YZ6lbwKq_dlqJZ_4HvKHU9gjfZ1t/view
+    Viewport: 1370x632, Page Height: 632
+  Page 82290FC7808AE025328D2F5F9006C360 (3.mp3 - Google Drive) - https://drive.google.com/file/d/1nn4F-mCo4DEKU0VCryHCpsPGmwpUo8Lw/view
+    Viewport: 1370x632, Page Height: 632
+  Page 752C28A82D7B1C535C329669BA863D23 (megamo aval trimmer 1.mp3 - Google Drive) - h
+--------------------------------------------------
+ID: 18WwxN0jfUm0yEm2fJWmJuCCtd7Nscbfz (Found in folder 7eb831a1-81be-4d0f-8d37-b34aab07c95b, line 109)
+Context:
+ryHCpsPGmwpUo8Lw/view
+    Viewport: 1370x632, Page Height: 632
+  Page 752C28A82D7B1C535C329669BA863D23 (megamo aval trimmer 1.mp3 - Google Drive) - https://drive.google.com/file/d/18WwxN0jfUm0yEm2fJWmJuCCtd7Nscbfz/view
+    Viewport: 1370x632, Page Height: 632
+</ADDITIONAL_METADATA>"}
+-----------------------------------------
+URL: https://dri
+--------------------------------------------------
+ID: 12HDEnqeHMqbFodxGh8TdogCgzSRwi1ET (Found in folder 7eb831a1-81be-4d0f-8d37-b34aab07c95b, line 109)
+Context:
+folders/1eikhO0Uim9klIfGkLcnX-WB_6Hjp2GBA
+    Viewport: 1370x632, Page Height: 632
+  Page 8D8E65FC9CE4CAAE5723AF59E898FF64 (2.mp3 - Google Drive) - https://drive.google.com/file/d/12HDEnqeHMqbFodxGh8TdogCgzSRwi1ET/view [ACTIVE]
+    Viewport: 1370x632, Page Height: 632
+</ADDITIONAL_METADATA>"}
+-----------------------------------------
+
+"}
+--------------------------------------------------
+ID: 1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7 (Found in folder 642710ee-33df-42c1-9637-01474a1a8aba, line 569)
+Context:
+
+4. Click **Copy link** and click **Done**.
+
+#### Step 3: Convert to a Direct Streaming Link
+The link you copied will look something like this:
+`https://drive.google.com/file/d/1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7/view?usp=sharing`
+
+Extract the unique **`FILE_ID`** (in this case, `1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7`) and format it into the direc
+--------------------------------------------------

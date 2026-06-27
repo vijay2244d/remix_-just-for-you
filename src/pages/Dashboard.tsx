@@ -10,10 +10,10 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const [hoveredBook, setHoveredBook] = useState<'story' | 'kural' | 'playlist' | null>(null);
   const [selectedBook, setSelectedBook] = useState<'story' | 'kural' | 'playlist' | null>(null);
-  
+
   // Track unlock state to delay entry animations
   const isUnlocked = useAppStore((state) => state.isUnlocked);
-  
+
   // Track viewport size for centering calculation
   const [isMd, setIsMd] = useState(false);
 
@@ -30,7 +30,7 @@ export const Dashboard = () => {
   const handleSelect = (book: 'story' | 'kural' | 'playlist') => {
     if (selectedBook) return; // Prevent double trigger
     setSelectedBook(book);
-    
+
     // Delayed route navigation to match the zoom animation
     setTimeout(() => {
       navigate(book === 'story' ? '/story' : book === 'kural' ? '/kural' : '/playlist');
@@ -55,18 +55,7 @@ export const Dashboard = () => {
       <div className="absolute inset-3 md:inset-4 border border-rose-500/10 pointer-events-none rounded-2xl z-10" />
       <div className="absolute inset-4 md:inset-5 border border-dashed border-amber-300/10 pointer-events-none rounded-2xl z-10" />
 
-      {/* Full-screen seamless transition color overlay */}
-      <AnimatePresence>
-        {selectedBook && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ delay: 0.4, duration: 0.5, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[#faf8f2] z-40 pointer-events-none"
-          />
-        )}
-      </AnimatePresence>
+      {/* No blocking overlay — book zoom animation handles the visual transition */}
 
       {/* Cursive Corner Floral Accents */}
       <div className="absolute top-0 left-0 w-32 h-32 md:w-44 md:h-44 text-rose-400/5 pointer-events-none z-0 transform rotate-90 scale-y-[-1]">
@@ -81,14 +70,14 @@ export const Dashboard = () => {
       </div>
 
       {/* Minimal Top Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -25 }}
         animate={
-          selectedBook 
-            ? { opacity: 0, y: -25 } 
-            : isUnlocked 
-            ? { opacity: 1, y: 0 } 
-            : { opacity: 0, y: -25 }
+          selectedBook
+            ? { opacity: 0, y: -25 }
+            : isUnlocked
+              ? { opacity: 1, y: 0 }
+              : { opacity: 0, y: -25 }
         }
         transition={{ duration: 0.6, delay: 0.6 }}
         className="mt-6 z-10 flex flex-col items-center gap-1 select-none pointer-events-none"
@@ -159,10 +148,10 @@ export const Dashboard = () => {
 
       {/* Main Interactive Book Selection Area */}
       <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-5xl px-4 flex-1">
-        
+
         {/* Animated Books Grid */}
         <div className="flex flex-row gap-6 md:gap-16 justify-center items-end w-full pb-3 mt-4">
-          
+
           {/* BOOK 1: FOR YOU (Story) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.4, y: 120 }}
@@ -170,20 +159,20 @@ export const Dashboard = () => {
               selectedBook === 'story'
                 ? { x: offset, y: -20, scale: 2.3, zIndex: 50, filter: "blur(0px)", opacity: [1, 1, 0.2, 0] }
                 : selectedBook
-                ? { x: -120, y: 30, scale: 0.7, opacity: 0, filter: "blur(6px)", pointerEvents: "none" }
-                : isUnlocked
-                ? { x: 0, y: 0, scale: 1, opacity: 1, filter: "blur(0px)" }
-                : { opacity: 0, scale: 0.4, y: 120 }
+                  ? { x: -120, y: 30, scale: 0.7, opacity: 0, filter: "blur(6px)", pointerEvents: "none" }
+                  : isUnlocked
+                    ? { x: 0, y: 0, scale: 1, opacity: 1, filter: "blur(0px)" }
+                    : { opacity: 0, scale: 0.4, y: 120 }
             }
             transition={
               selectedBook
                 ? { duration: 0.95, ease: [0.25, 1, 0.5, 1] }
-                : { 
-                    type: "spring", 
-                    stiffness: 60, 
-                    damping: 14, 
-                    delay: 0.4 
-                  }
+                : {
+                  type: "spring",
+                  stiffness: 60,
+                  damping: 14,
+                  delay: 0.4
+                }
             }
             onMouseEnter={() => !selectedBook && setHoveredBook('story')}
             onMouseLeave={() => !selectedBook && setHoveredBook(null)}
@@ -213,20 +202,20 @@ export const Dashboard = () => {
               selectedBook === 'kural'
                 ? { x: 0, y: -20, scale: 2.3, zIndex: 50, filter: "blur(0px)", opacity: [1, 1, 0.2, 0] }
                 : selectedBook
-                ? { x: selectedBook === 'story' ? 120 : -120, y: 30, scale: 0.7, opacity: 0, filter: "blur(6px)", pointerEvents: "none" }
-                : isUnlocked
-                ? { x: 0, y: 0, scale: 1, opacity: 1, filter: "blur(0px)" }
-                : { opacity: 0, scale: 0.4, y: 120 }
+                  ? { x: selectedBook === 'story' ? 120 : -120, y: 30, scale: 0.7, opacity: 0, filter: "blur(6px)", pointerEvents: "none" }
+                  : isUnlocked
+                    ? { x: 0, y: 0, scale: 1, opacity: 1, filter: "blur(0px)" }
+                    : { opacity: 0, scale: 0.4, y: 120 }
             }
             transition={
               selectedBook
                 ? { duration: 0.95, ease: [0.25, 1, 0.5, 1] }
-                : { 
-                    type: "spring", 
-                    stiffness: 60, 
-                    damping: 14, 
-                    delay: 0.55 
-                  }
+                : {
+                  type: "spring",
+                  stiffness: 60,
+                  damping: 14,
+                  delay: 0.55
+                }
             }
             onMouseEnter={() => !selectedBook && setHoveredBook('kural')}
             onMouseLeave={() => !selectedBook && setHoveredBook(null)}
@@ -256,20 +245,20 @@ export const Dashboard = () => {
               selectedBook === 'playlist'
                 ? { x: -offset, y: -20, scale: 2.3, zIndex: 50, filter: "blur(0px)", opacity: [1, 1, 0.2, 0] }
                 : selectedBook
-                ? { x: 120, y: 30, scale: 0.7, opacity: 0, filter: "blur(6px)", pointerEvents: "none" }
-                : isUnlocked
-                ? { x: 0, y: 0, scale: 1, opacity: 1, filter: "blur(0px)" }
-                : { opacity: 0, scale: 0.4, y: 120 }
+                  ? { x: 120, y: 30, scale: 0.7, opacity: 0, filter: "blur(6px)", pointerEvents: "none" }
+                  : isUnlocked
+                    ? { x: 0, y: 0, scale: 1, opacity: 1, filter: "blur(0px)" }
+                    : { opacity: 0, scale: 0.4, y: 120 }
             }
             transition={
               selectedBook
                 ? { duration: 0.95, ease: [0.25, 1, 0.5, 1] }
-                : { 
-                    type: "spring", 
-                    stiffness: 60, 
-                    damping: 14, 
-                    delay: 0.7 
-                  }
+                : {
+                  type: "spring",
+                  stiffness: 60,
+                  damping: 14,
+                  delay: 0.7
+                }
             }
             onMouseEnter={() => !selectedBook && setHoveredBook('playlist')}
             onMouseLeave={() => !selectedBook && setHoveredBook(null)}
@@ -295,18 +284,18 @@ export const Dashboard = () => {
         </div>
 
         {/* Glassmorphic Reading Shelf Pedestal */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scaleX: 0.3, y: 30 }}
           animate={
-            selectedBook 
-              ? { opacity: 0, scaleX: 0.7, y: 15 } 
-              : isUnlocked 
-              ? { opacity: 1, scaleX: 1, y: 0 } 
-              : { opacity: 0, scaleX: 0.3, y: 30 }
+            selectedBook
+              ? { opacity: 0, scaleX: 0.7, y: 15 }
+              : isUnlocked
+                ? { opacity: 1, scaleX: 1, y: 0 }
+                : { opacity: 0, scaleX: 0.3, y: 30 }
           }
-          transition={{ 
-            type: "spring", 
-            stiffness: 70, 
+          transition={{
+            type: "spring",
+            stiffness: 70,
             damping: 15,
             delay: 0.2
           }}
@@ -318,14 +307,14 @@ export const Dashboard = () => {
         </motion.div>
 
         {/* Dynamic Detail Info Panel below shelf */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={
-            selectedBook 
-              ? { opacity: 0, y: 15 } 
-              : isUnlocked 
-              ? { opacity: 1, y: 0 } 
-              : { opacity: 0, y: 20 }
+            selectedBook
+              ? { opacity: 0, y: 15 }
+              : isUnlocked
+                ? { opacity: 1, y: 0 }
+                : { opacity: 0, y: 20 }
           }
           transition={{ duration: 0.6, delay: 0.7 }}
           className="w-full max-w-lg mt-12 min-h-[90px] text-center flex flex-col justify-start items-center px-4 select-none pointer-events-none"
@@ -406,14 +395,14 @@ export const Dashboard = () => {
       </div>
 
       {/* Minimal Bottom Footer */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 25 }}
         animate={
-          selectedBook 
-            ? { opacity: 0, y: 25 } 
-            : isUnlocked 
-            ? { opacity: 1, y: 0 } 
-            : { opacity: 0, y: 25 }
+          selectedBook
+            ? { opacity: 0, y: 25 }
+            : isUnlocked
+              ? { opacity: 1, y: 0 }
+              : { opacity: 0, y: 25 }
         }
         transition={{ duration: 0.6, delay: 0.8 }}
         className="mb-6 z-10 select-none pointer-events-none text-center"

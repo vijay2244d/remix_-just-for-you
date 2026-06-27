@@ -118,7 +118,7 @@ float perlin3D(float amplitude, float frequency, float px, float py, float pz) {
   float lx11 = mix(d011, d111, sx);
 
   float ly0 = mix(lx00, lx10, sy);
-  float ly1 = mix(lx01, lx11, sz);
+  float ly1 = mix(lx01, lx11, sy);
 
   return amplitude * mix(ly0, ly1, sz);
 }
@@ -139,7 +139,11 @@ float auroraGlow(float t, vec2 shift) {
   }
 
   float yBand = uv.y * 10.0 - uBandHeight * 10.0;
-  return 0.3 * max(exp(uBandSpread * (1.0 - 1.1 * abs(noiseVal + yBand))), 0.0);
+  float dist = noiseVal + yBand;
+  // Smooth abs: sqrt(d^2 + eps) rounds the V-crease into a smooth peak
+  // — same band shape and brightness as abs(), but no visible crease line
+  float smoothDist = sqrt(dist * dist + 0.012);
+  return 0.3 * max(exp(uBandSpread * (1.0 - 1.1 * smoothDist)), 0.0);
 }
 
 void main() {
@@ -212,6 +216,20 @@ export default function SoftAurora({
     resize();
 
     const geometry = new Triangle(gl);
+    // Extend the triangle well beyond clip space so its hypotenuse edge
+    // never crosses the visible viewport — eliminates the diagonal line artifact
+    const pos = geometry.attributes.position;
+    const uv2 = geometry.attributes.uv;
+    // OGL Triangle default: top-left (-1,3), bottom-left (-1,-1), bottom-right (3,-1)
+    // Scale by 2x to push edges far off-screen
+    for (let i = 0; i < pos.data.length; i++) {
+      pos.data[i] *= 2;
+    }
+    for (let i = 0; i < uv2.data.length; i++) {
+      uv2.data[i] *= 2;
+    }
+    pos.needsUpdate = true;
+    uv2.needsUpdate = true;
     program = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,

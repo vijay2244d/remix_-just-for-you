@@ -13,6 +13,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
   const [progress, setProgress] = useState(0);
   const [cameraError, setCameraError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const butterfliesRef = useRef<HTMLDivElement>(null);
 
   const [binaryDrops, setBinaryDrops] = useState<{ id: number; text: string; x: number; y: number; speed: number }[]>([]);
 
@@ -32,7 +33,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
   useEffect(() => {
     if (phase === 'auth') {
       let stream: MediaStream | null = null;
-      
+
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true })
           .then(s => {
@@ -65,7 +66,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
           return Math.min(100, p + Math.floor(Math.random() * 15) + 5);
         });
       }, 300);
-      
+
       return () => {
         clearInterval(interval);
         if (stream) {
@@ -173,10 +174,58 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
     };
   }, [phase, handleClick]);
 
+  // Butterflies 3D background — lock phase only
+  useEffect(() => {
+    if (phase !== 'lock') return;
+    // Capture ref value immediately — React clears refs before cleanup runs
+    const el = butterfliesRef.current;
+    if (!el) return;
+    let destroyed = false;
+    let inst: any = null;
+    (async () => {
+      try {
+        const { butterfliesBackground } = await import(
+          /* @vite-ignore */ 'https://unpkg.com/threejs-toys@0.0.7/build/threejs-toys.module.cdn.min.js'
+        );
+        if (destroyed) return;
+        el.innerHTML = '';
+        inst = butterfliesBackground({
+          el,
+          eventsEl: el,
+          gpgpuSize: 96,
+          background: 0xfff1f2,
+          material: 'basic',
+          materialParams: { transparent: true, alphaTest: 0.5 },
+          texture: 'https://assets.codepen.io/33787/butterflies.png',
+          textureCount: 4,
+          wingsScale: [1, 1, 1],
+          wingsWidthSegments: 8,
+          wingsHeightSegments: 8,
+          wingsSpeed: 0.75,
+          wingsDisplacementScale: 1.25,
+          noiseCoordScale: 0.01,
+          noiseTimeCoef: 0.0005,
+          noiseIntensity: 0.0025,
+          attractionRadius1: 100,
+          attractionRadius2: 150,
+          maxVelocity: 0.1,
+        });
+      } catch (e) {
+        console.error('Butterflies failed:', e);
+      }
+    })();
+    return () => {
+      destroyed = true;
+      try { inst?.three?.renderer?.dispose(); } catch (_) {}
+      // Use captured el — butterfliesRef.current may be null by this point
+      try { el.innerHTML = ''; } catch (_) {}
+    };
+  }, [phase]);
+
   const clickRatio = Math.min(1, clicks / targetClicks);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
@@ -188,13 +237,13 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
       {/* Cyber Backgrounds */}
       <AnimatePresence>
         {(phase === 'auth' || phase === 'auth-success') && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
             className="absolute inset-0 pointer-events-none"
           >
-            <div 
+            <div
               className="absolute inset-0 pointer-events-none opacity-20"
               style={{
                 backgroundImage: `
@@ -204,8 +253,8 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
                 backgroundSize: '40px 40px'
               }}
             />
-            <div 
-              className="absolute inset-0 pointer-events-none opacity-80" 
+            <div
+              className="absolute inset-0 pointer-events-none opacity-80"
               style={{
                 background: 'radial-gradient(circle at center, transparent 0%, #000 100%)'
               }}
@@ -217,15 +266,23 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
       {/* Romantic Background */}
       <AnimatePresence>
         {(phase === 'lock' || phase === 'final-caption') && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
             className="absolute inset-0 pointer-events-none bg-rose-50"
           >
-            <div className="absolute inset-0 opacity-20" style={{
+            {/* Butterflies 3D animation — only on lock phase */}
+            {phase === 'lock' && (
+              <div
+                ref={butterfliesRef}
+                className="absolute inset-0 overflow-hidden"
+              />
+            )}
+            <div className="absolute inset-0 opacity-10" style={{
               backgroundImage: 'radial-gradient(#fda4af 1px, transparent 1px)',
-              backgroundSize: '24px 24px'
+              backgroundSize: '24px 24px',
+              pointerEvents: 'none'
             }} />
           </motion.div>
         )}
@@ -251,7 +308,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
 
       {/* Main Content Area */}
       <AnimatePresence mode="wait">
-        
+
         {phase === 'auth' && (
           <motion.div
             key="auth"
@@ -267,7 +324,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
               <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-green-500 z-10" />
               <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-green-500 z-10" />
               <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-green-500 z-10" />
-              
+
               <div className="w-full h-full overflow-hidden bg-black/50 border border-green-500/30 relative mix-blend-screen shadow-[0_0_20px_rgba(34,197,94,0.2)]">
                 {!cameraError ? (
                   <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover -scale-x-100 grayscale contrast-125 sepia-[0.3] hue-rotate-90 opacity-60" />
@@ -277,9 +334,9 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
                     <span className="text-xs text-green-500/50 uppercase tracking-widest">NO FFED</span>
                   </div>
                 )}
-                
+
                 {/* HUD Scanner Line */}
-                <motion.div 
+                <motion.div
                   className="absolute left-0 right-0 h-[2px] bg-green-400 shadow-[0_0_15px_3px_rgba(74,222,128,0.6)] z-20"
                   animate={{ top: ['0%', '100%', '0%'] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
@@ -289,7 +346,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSJub25lIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9InJnYmEoMzQsMTk3LDk0LDAuMykiPjwvcmVjdD4KPC9zdmc+')] z-10 opacity-60 mix-blend-overlay" />
               </div>
             </div>
-            
+
             <div className="flex flex-col items-center w-full">
               <h2 className="text-lg md:text-xl font-bold text-green-400 tracking-widest text-center uppercase animate-pulse">
                 Biometric Scan
@@ -300,7 +357,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
             </div>
 
             <div className="w-full h-1 bg-green-900/40 mt-2 relative overflow-hidden">
-              <motion.div 
+              <motion.div
                 className="h-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.8)]"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
@@ -346,7 +403,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
             exit={{ opacity: 0, scale: 1.1 }}
             className="flex flex-col items-center justify-center z-10 px-8 text-center"
           >
-            <motion.h2 
+            <motion.h2
               initial={{ textShadow: "0 0 0px rgba(74,222,128,0)" }}
               animate={{ textShadow: "0 0 20px rgba(74,222,128,0.8)" }}
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut", repeatType: "reverse" }}
@@ -365,12 +422,12 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
             exit={{ opacity: 0, scale: 1.1 }}
             className="flex flex-col items-center justify-center z-10 px-8 text-center gap-4"
           >
-            <motion.p 
+            <motion.p
               className="text-lg md:text-2xl font-display font-medium text-rose-400 tracking-wide italic"
             >
               thats how you unlock my love book
             </motion.p>
-            <motion.h2 
+            <motion.h2
               className="text-3xl md:text-5xl font-display font-medium text-rose-500 tracking-wider"
             >
               Thanks for save the love life🌚
@@ -390,10 +447,10 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
               <div className="w-20 h-20 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center mb-6 border border-rose-50 relative overflow-hidden">
                 <div className={`absolute inset-0 bg-rose-100 transition-opacity duration-300 ${isPressing ? 'opacity-100' : 'opacity-0'}`} />
                 <motion.div animate={isPressing ? { scale: [1, 1.2, 1] } : { scale: 1 }} transition={isPressing ? { repeat: Infinity, duration: 0.6 } : {}}>
-                   <Lock className="w-8 h-8 text-rose-500 relative z-10" />
+                  <Lock className="w-8 h-8 text-rose-500 relative z-10" />
                 </motion.div>
               </div>
-              <motion.h2 
+              <motion.h2
                 animate={isPressing ? { scale: [1, 1.05, 1] } : { scale: 1 }}
                 transition={isPressing ? { repeat: Infinity, duration: 0.6 } : {}}
                 className="text-2xl md:text-3xl font-display font-bold text-rose-800 tracking-tight"
@@ -403,7 +460,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
             </div>
 
             {/* Heartbeat EKG Line */}
-            <div 
+            <div
               className="w-full h-12 relative flex items-center justify-center text-rose-500 my-1"
               style={{ maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' }}
             >
@@ -432,7 +489,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
                 <span>{Math.floor(clickRatio * 100)}%</span>
               </div>
               <div className="w-full h-4 bg-rose-100/50 rounded-full overflow-hidden flex shadow-inner border border-rose-200/50 p-[2px]">
-                <motion.div 
+                <motion.div
                   className="h-full bg-gradient-to-r from-rose-400 to-rose-500 rounded-full shadow-[0_0_10px_rgba(244,63,94,0.5)]"
                   initial={{ width: 0 }}
                   animate={{ width: `${clickRatio * 100}%` }}
@@ -443,7 +500,7 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       <KissRain active={phase === 'lock' && isPressing} />
       <HeartRain active={phase === 'lock' && isPressing} />
     </motion.div>

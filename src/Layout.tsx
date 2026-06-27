@@ -1,4 +1,4 @@
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState, useRef, memo, ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Heart, Sparkles, Mail, BookHeart } from "lucide-react";
@@ -173,7 +173,7 @@ const SPREADS = [
   },
 ];
 
-const BackgroundDecor = () => {
+const BackgroundDecor = memo(() => {
   const [particles] = useState(() => 
     Array.from({ length: 15 }).map(() => ({
       left: Math.random() * 100,
@@ -217,7 +217,9 @@ const BackgroundDecor = () => {
       ))}
     </div>
   );
-};
+});
+
+BackgroundDecor.displayName = 'BackgroundDecor';
 
 export const Layout = () => {
   const location = useLocation();
@@ -235,16 +237,94 @@ export const Layout = () => {
   const [flipDirection, setFlipDirection] = useState<'forward' | 'backward'>('forward');
   const [showKissRain, setShowKissRain] = useState(false);
   const [showHeartRain, setShowHeartRain] = useState(false);
+  // Track rain timeout to prevent stacking and ensure cleanup on unmount
+  const rainTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Butterflies background ref
+  const butterfliesRef = useRef<HTMLDivElement>(null);
+
+  // Initialize butterflies background on mount
+  useEffect(() => {
+    // Capture ref value immediately — React clears refs before cleanup runs
+    const el = butterfliesRef.current;
+    if (!el) return;
+    let isDestroyed = false;
+    let instance: any = null;
+
+    const initButterflies = async () => {
+      try {
+        const { butterfliesBackground } = await import(
+          /* @vite-ignore */ 'https://unpkg.com/threejs-toys@0.0.7/build/threejs-toys.module.cdn.min.js'
+        );
+        if (isDestroyed) return;
+        el.innerHTML = '';
+        instance = butterfliesBackground({
+          el,
+          eventsEl: el,
+          gpgpuSize: 64,
+          background: 0xfdf2f8,
+          material: 'basic',
+          materialParams: { transparent: true, alphaTest: 0.5 },
+          texture: 'https://assets.codepen.io/33787/butterflies.png',
+          textureCount: 4,
+          wingsScale: [0.8, 0.8, 0.8],
+          wingsWidthSegments: 8,
+          wingsHeightSegments: 8,
+          wingsSpeed: 0.6,
+          wingsDisplacementScale: 1.25,
+          noiseCoordScale: 0.01,
+          noiseTimeCoef: 0.0005,
+          noiseIntensity: 0.002,
+          attractionRadius1: 100,
+          attractionRadius2: 150,
+          maxVelocity: 0.08
+        });
+      } catch (err) {
+        console.error('Butterflies background failed:', err);
+      }
+    };
+
+    initButterflies();
+
+    return () => {
+      isDestroyed = true;
+      try { instance?.three?.renderer?.dispose(); } catch (_) {}
+      // Use captured el — butterfliesRef.current may be null by this point
+      try { el.innerHTML = ''; } catch (_) {}
+    };
+  }, []);
+
+  // Safety timeout: if onAnimationComplete ever fails to fire, reset isFlipping after 1.2s
+  // (animation is 0.75s, so 1.2s gives plenty of buffer)
+  const flipSafetyRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (targetIndex !== renderedSpread && !isFlipping) {
       setFlipDirection(targetIndex > renderedSpread ? 'forward' : 'backward');
       setIsFlipping(true);
+      // Safety net: auto-reset if animation callback doesn't fire
+      if (flipSafetyRef.current) clearTimeout(flipSafetyRef.current);
+      flipSafetyRef.current = setTimeout(() => {
+        setRenderedSpread(targetIndex);
+        setIsFlipping(false);
+      }, 1200);
     }
   }, [targetIndex, renderedSpread, isFlipping]);
 
+  // Clear all timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (rainTimeoutRef.current) clearTimeout(rainTimeoutRef.current);
+      if (flipSafetyRef.current) clearTimeout(flipSafetyRef.current);
+    };
+  }, []);
+
   const goToPage = (newIndex: number) => {
-    if (newIndex === targetIndex || isFlipping || newIndex < 0 || newIndex >= SPREADS.length) return;
+    console.log('goToPage called:', { newIndex, targetIndex, isFlipping });
+    if (newIndex === targetIndex || isFlipping || newIndex < 0 || newIndex >= SPREADS.length) {
+      console.warn('goToPage aborted early:', { newIndex, targetIndex, isFlipping });
+      return;
+    }
     navigate(SPREADS[newIndex].path);
   };
 
@@ -253,6 +333,12 @@ export const Layout = () => {
 
   return (
     <div className="h-[100svh] w-full bg-pink-50 overflow-hidden relative selection:bg-rose-200 selection:text-rose-900 font-sans flex flex-col items-center justify-center p-2 md:p-8">
+      {/* Butterflies 3D background - pointer-events:none so it never blocks button clicks */}
+      <div
+        ref={butterfliesRef}
+        className="absolute inset-0 butterflies-bg"
+        style={{ zIndex: 0, pointerEvents: 'none' }}
+      />
       <BackgroundDecor />
       <HeartRain active={showHeartRain} />
       <KissRain active={showKissRain} />
@@ -262,12 +348,18 @@ export const Layout = () => {
         <div className="absolute right-4 md:right-8 lg:right-12 top-1/2 -translate-y-1/2 z-50">
           <button 
             onClick={() => {
-              setShowKissRain(true);
-              setShowHeartRain(true);
-              setTimeout(() => {
-                setShowKissRain(false);
-                setShowHeartRain(false);
-              }, 3000);
+              console.log('💋 button clicked', { targetIndex, isFlipping });
+              // Clear any existing timeout before setting a new one
+              if (rainTimeoutRef.current) clearTimeout(rainTimeoutRef.current);
+              // Delay rain until after the flip animation completes (0.75s)
+              rainTimeoutRef.current = setTimeout(() => {
+                setShowKissRain(true);
+                setShowHeartRain(true);
+                rainTimeoutRef.current = setTimeout(() => {
+                  setShowKissRain(false);
+                  setShowHeartRain(false);
+                }, 3000);
+              }, 800);
               if (targetIndex < SPREADS.length - 1) {
                 goToPage(targetIndex + 1);
               } else {
@@ -288,12 +380,18 @@ export const Layout = () => {
         <div className="absolute left-4 md:left-8 lg:left-12 top-1/2 -translate-y-1/2 z-50">
           <button 
             onClick={() => {
-              setShowKissRain(true);
-              setShowHeartRain(true);
-              setTimeout(() => {
-                setShowKissRain(false);
-                setShowHeartRain(false);
-              }, 3000);
+              console.log('❤️ button clicked', { targetIndex, isFlipping });
+              // Clear any existing timeout before setting a new one
+              if (rainTimeoutRef.current) clearTimeout(rainTimeoutRef.current);
+              // Delay rain until after the flip animation completes (0.75s)
+              rainTimeoutRef.current = setTimeout(() => {
+                setShowKissRain(true);
+                setShowHeartRain(true);
+                rainTimeoutRef.current = setTimeout(() => {
+                  setShowKissRain(false);
+                  setShowHeartRain(false);
+                }, 3000);
+              }, 800);
               if (targetIndex > 0) {
                 goToPage(targetIndex - 1);
               }
@@ -335,14 +433,14 @@ export const Layout = () => {
         )}
 
         {/* Stationary Left Page */}
-        <div className="w-1/2 h-full relative z-10 shrink-0">
+        <div className="w-1/2 h-full relative z-10 shrink-0" style={{ willChange: 'transform' }}>
           <LeftPageFrame isBlank={currentLeft === null}>
             {currentLeft}
           </LeftPageFrame>
         </div>
         
         {/* Stationary Right Page */}
-        <div className="w-1/2 h-full relative z-10 shrink-0">
+        <div className="w-1/2 h-full relative z-10 shrink-0" style={{ willChange: 'transform' }}>
           <RightPageFrame>
             {currentRight}
           </RightPageFrame>
@@ -351,19 +449,16 @@ export const Layout = () => {
         {/* Flipping Forward */}
         {isFlipping && flipDirection === 'forward' && (
           <motion.div
-            initial={{ rotateY: 0, z: 0 }}
-            animate={{ 
-              rotateY: -180,
-              z: [0, 80, 0],
-              rotateX: [0, 3, 0]
-            }}
-            transition={{ duration: 1.4, ease: [0.645, 0.045, 0.355, 1.000] }}
+            initial={{ rotateY: 0 }}
+            animate={{ rotateY: -180 }}
+            transition={{ duration: 0.75, ease: [0.645, 0.045, 0.355, 1.000] }}
             onAnimationComplete={() => {
+               if (flipSafetyRef.current) clearTimeout(flipSafetyRef.current);
                setRenderedSpread(targetIndex);
                setIsFlipping(false);
             }}
             className="absolute right-0 w-1/2 h-full z-30 origin-left transform-style-3d"
-            style={{ transformStyle: "preserve-3d" }}
+            style={{ transformStyle: "preserve-3d", willChange: 'transform' }}
           >
             {/* Front (Old Right) */}
             <div className="absolute inset-0 backface-hidden shadow-[20px_0_30px_rgba(0,0,0,0.15)] flex">
@@ -375,7 +470,7 @@ export const Layout = () => {
                 className="absolute inset-0 bg-gradient-to-l from-black/0 to-black/20 pointer-events-none"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 1.4, ease: "easeIn" }}
+                transition={{ duration: 0.75, ease: "easeIn" }}
               />
             </div>
             {/* Back (New Left) */}
@@ -388,7 +483,7 @@ export const Layout = () => {
                 className="absolute inset-0 bg-gradient-to-r from-black/0 to-black/20 pointer-events-none"
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 0 }}
-                transition={{ duration: 1.4, ease: "easeOut" }}
+                transition={{ duration: 0.75, ease: "easeOut" }}
               />
             </div>
           </motion.div>
@@ -397,19 +492,16 @@ export const Layout = () => {
         {/* Flipping Backward */}
         {isFlipping && flipDirection === 'backward' && (
           <motion.div
-            initial={{ rotateY: 0, z: 0 }}
-            animate={{ 
-              rotateY: 180,
-              z: [0, 80, 0],
-              rotateX: [0, 3, 0]
-            }}
-            transition={{ duration: 1.4, ease: [0.645, 0.045, 0.355, 1.000] }}
+            initial={{ rotateY: 0 }}
+            animate={{ rotateY: 180 }}
+            transition={{ duration: 0.75, ease: [0.645, 0.045, 0.355, 1.000] }}
             onAnimationComplete={() => {
+               if (flipSafetyRef.current) clearTimeout(flipSafetyRef.current);
                setRenderedSpread(targetIndex);
                setIsFlipping(false);
             }}
             className="absolute left-0 w-1/2 h-full z-30 origin-right transform-style-3d"
-            style={{ transformStyle: "preserve-3d" }}
+            style={{ transformStyle: "preserve-3d", willChange: 'transform' }}
           >
             {/* Front (Old Left) */}
             <div className="absolute inset-0 backface-hidden shadow-[-20px_0_30px_rgba(0,0,0,0.15)] flex">
@@ -420,7 +512,7 @@ export const Layout = () => {
                 className="absolute inset-0 bg-gradient-to-r from-black/0 to-black/20 pointer-events-none"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 1.4, ease: "easeIn" }}
+                transition={{ duration: 0.75, ease: "easeIn" }}
               />
             </div>
             {/* Back (New Right) */}
@@ -432,7 +524,7 @@ export const Layout = () => {
                 className="absolute inset-0 bg-gradient-to-l from-black/0 to-black/20 pointer-events-none"
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 0 }}
-                transition={{ duration: 1.4, ease: "easeOut" }}
+                transition={{ duration: 0.75, ease: "easeOut" }}
               />
             </div>
           </motion.div>

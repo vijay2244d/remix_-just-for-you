@@ -1,13 +1,39 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dhivuu for you</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
 
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // Safeguard pointer capture APIs from crashing event propagation
+    if (typeof Element !== 'undefined') {
+      if (Element.prototype.setPointerCapture) {
+        const originalSetPointerCapture = Element.prototype.setPointerCapture;
+        Element.prototype.setPointerCapture = function (pointerId) {
+          try {
+            originalSetPointerCapture.call(this, pointerId);
+          } catch (error) {
+            console.warn("Ignored setPointerCapture error:", error);
+          }
+        };
+      }
+      if (Element.prototype.releasePointerCapture) {
+        const originalReleasePointerCapture = Element.prototype.releasePointerCapture;
+        Element.prototype.releasePointerCapture = function (pointerId) {
+          try {
+            originalReleasePointerCapture.call(this, pointerId);
+          } catch (error) {
+            console.warn("Ignored releasePointerCapture error:", error);
+          }
+        };
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

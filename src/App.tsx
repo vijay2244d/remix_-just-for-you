@@ -11,10 +11,9 @@ import { AnimatePresence } from "framer-motion";
 export default function App() {
   const { isUnlocked, setUnlocked } = useAppStore();
 
+  // Lock screen is shown on all environments including localhost
   useEffect(() => {
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      setUnlocked(true);
-    }
+    // setUnlocked(true); // Uncomment to skip lock screen during development
   }, [setUnlocked]);
 
   return (

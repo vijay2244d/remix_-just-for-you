@@ -6,16 +6,19 @@ export const KissRain = ({ active }: { active: boolean }) => {
 
   useEffect(() => {
     if (active && raindrops.length === 0) {
-      // Generate drops
       const drops = Array.from({ length: 50 }).map((_, i) => ({
         id: i,
-        left: Math.random() * 100, // percentage 0-100
+        left: Math.random() * 100,
         size: Math.random() * 1.5 + 1.0,
-        delay: Math.random() * 1.5, // stagger the rain
-        duration: Math.random() * 2 + 2, // some fall faster
+        delay: Math.random() * 1.5,
+        duration: Math.random() * 2 + 2,
         emoji: Math.random() > 0.5 ? '💋' : '❤️',
       }));
       setRaindrops(drops);
+    }
+    // Reset when deactivated so next trigger regenerates fresh drops
+    if (!active && raindrops.length > 0) {
+      setRaindrops([]);
     }
   }, [active, raindrops.length]);
 

@@ -75,6 +75,12 @@ const imageOrder = [
   "imaye.png", // CD 51
   "en manpura mangai.png", // CD 52
   "naan pizhai.png", // CD 53
+  "chimmamma.png", // CD 54
+  "eppadi vandhayo.png", // CD 55
+  "mesaya muruku.png", // CD 56
+  "tharame.png", // CD 57
+  "thottijeya.png", // CD 58
+  "velayutham.png", // CD 59
   "azhagiye.png" // CD 1
 ];
 

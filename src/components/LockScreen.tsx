@@ -29,6 +29,69 @@ export const LockScreen = ({ onUnlock }: LockScreenProps) => {
     activityTimeoutRef.current = setTimeout(() => setIsPressing(false), 350);
   }, []);
 
+  // ─── Background Asset Preloader ─────────────────────────────────────────
+  // Fires immediately on lock screen mount — during biometric auth (~4s),
+  // auth-success (2.5s), caption (3s), and lock phase, giving ~9+ seconds
+  // to silently preload everything before the user reaches the playlist.
+  useEffect(() => {
+    let cancelled = false;
+
+    const preload = async () => {
+      // 1. Pre-import the threejs-toys butterfly library (heaviest, do first)
+      try {
+        await import(/* @vite-ignore */ 'https://unpkg.com/threejs-toys@0.0.7/build/threejs-toys.module.cdn.min.js');
+      } catch (_) { /* CDN may be unavailable, ignore */ }
+
+      if (cancelled) return;
+
+      // 2. Preload all music book images using Image() — browser caches them
+      const imageModules = import.meta.glob<string>(
+        '../assets/images/*.{png,jpg,jpeg,webp}',
+        { eager: true, import: 'default' }
+      );
+      const imageUrls = Object.values(imageModules);
+
+      // Also load scrapbook images from music book pictures folder
+      const scrapImages = import.meta.glob<string>(
+        '../../music book pictures/Modern Elegant Couple Wedding Photo Poster/*.png',
+        { eager: true, import: 'default' }
+      );
+      const scrapUrls = Object.values(scrapImages);
+
+      const allImageUrls = [...imageUrls, ...scrapUrls];
+      allImageUrls.forEach(src => {
+        if (!src || cancelled) return;
+        const img = new Image();
+        img.src = src;
+      });
+
+      if (cancelled) return;
+
+      // 3. Preload audio files — fetch the first 64KB of each to warm cache
+      const audioModules = import.meta.glob<string>(
+        '../assets/audio/*.mp3',
+        { eager: true, import: 'default' }
+      );
+      const audioUrls = Object.values(audioModules);
+
+      // Stagger audio preloads so we don't flood the network at once
+      for (let i = 0; i < audioUrls.length; i++) {
+        if (cancelled) break;
+        const src = audioUrls[i];
+        if (!src) continue;
+        try {
+          await fetch(src, { headers: { Range: 'bytes=0-65535' }, cache: 'force-cache' });
+        } catch (_) { /* Ignore individual fetch errors */ }
+        // Small gap between fetches to avoid network congestion
+        await new Promise(r => setTimeout(r, 80));
+      }
+    };
+
+    preload();
+    return () => { cancelled = true; };
+  }, []); // Run once on mount only
+  // ────────────────────────────────────────────────────────────────────────
+
   // Phase 1: Auth (Biometric Scan)
   useEffect(() => {
     if (phase === 'auth') {

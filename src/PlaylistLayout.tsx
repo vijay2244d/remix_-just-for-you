@@ -66,6 +66,113 @@ const isValidAudioSrc = (src: string | undefined): boolean => {
   return typeof src === "string" && src.length > 5;
 };
 
+const overlayVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0, transition: { duration: 0.4, delay: 1.8 } }
+};
+
+const containerVariants = {
+  hidden: ({ isMobile }) => ({
+    scale: 0.88,
+    y: 40,
+    opacity: 0,
+    maxWidth: "475px",
+    maxHeight: isMobile ? "260px" : "none"
+  }),
+  visibleClosed: ({ isMobile }) => ({
+    scale: 1,
+    y: 0,
+    opacity: 1,
+    maxWidth: "475px",
+    maxHeight: isMobile ? "260px" : "none",
+    transition: { type: "spring", stiffness: 120, damping: 19 }
+  }),
+  visibleOpen: ({ isMobile }) => ({
+    scale: 1,
+    y: 0,
+    opacity: 1,
+    maxWidth: isMobile ? "475px" : "950px",
+    maxHeight: isMobile ? "800px" : "none",
+    transition: { type: "spring", stiffness: 120, damping: 19 }
+  }),
+  exit: ({ isMobile }) => ({
+    scale: 0.88,
+    y: 40,
+    opacity: 0,
+    maxWidth: "475px",
+    maxHeight: isMobile ? "260px" : "none",
+    transition: {
+      maxWidth: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0 },
+      maxHeight: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0 },
+      scale: { type: "tween", duration: 0.4, delay: 1.8 },
+      y: { type: "tween", duration: 0.4, delay: 1.8 },
+      opacity: { type: "tween", duration: 0.4, delay: 1.8 }
+    }
+  })
+};
+
+const coverVariants = {
+  hidden: { rotateY: 0 },
+  visibleClosed: {
+    rotateY: 0,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0 }
+  },
+  visibleOpen: {
+    rotateY: -155,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }
+  },
+  exit: {
+    rotateY: 0,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0 }
+  }
+};
+
+const shadowVariants = {
+  hidden: { opacity: 0, scaleX: 0 },
+  visibleClosed: {
+    opacity: 0,
+    scaleX: 0,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0 }
+  },
+  visibleOpen: {
+    opacity: 0.4,
+    scaleX: 1,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }
+  },
+  exit: {
+    opacity: 0,
+    scaleX: 0,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0 }
+  }
+};
+
+const bookletVariants = {
+  hidden: ({ isMobile }) => ({
+    x: isMobile ? "0%" : "-100%",
+    y: isMobile ? "-100%" : "0%",
+    opacity: 0
+  }),
+  visibleClosed: ({ isMobile }) => ({
+    x: isMobile ? "0%" : "-100%",
+    y: isMobile ? "-100%" : "0%",
+    opacity: 0,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0 }
+  }),
+  visibleOpen: {
+    x: "0%",
+    y: "0%",
+    opacity: 1,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }
+  },
+  exit: ({ isMobile }) => ({
+    x: isMobile ? "0%" : "-100%",
+    y: isMobile ? "-100%" : "0%",
+    opacity: 0,
+    transition: { type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0 }
+  })
+};
+
 export const PlaylistLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -86,6 +193,20 @@ export const PlaylistLayout = () => {
   // Butterfly background ref for CD overlay
   const cdButterfliesRef = useRef<HTMLDivElement>(null);
   const [coverOpen, setCoverOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    console.log("PLAYLIST_LAYOUT: MOUNTED");
+    return () => console.log("PLAYLIST_LAYOUT: UNMOUNTED");
+  }, []);
 
   const activeCd = useMemo(() => {
     const parts = location.pathname.split("/").filter(Boolean);
@@ -111,7 +232,7 @@ export const PlaylistLayout = () => {
     if (cdId === null) return "";
     const cdItem = cds.find(c => c.id === cdId);
     if (!cdItem || !cdItem.fileName) return "";
-    
+
     // Check if there are multiple tracks (e.g., cdItem.fileName + "_1", cdItem.fileName + "_2"...)
     // Let's count how many tracks exist for this fileName
     const tracks: string[] = [];
@@ -125,11 +246,11 @@ export const PlaylistLayout = () => {
         break;
       }
     }
-    
+
     if (tracks.length > 0) {
       return tracks;
     }
-    
+
     // If no numbered tracks exist, check for a single track
     const singleKey = `./assets/audio/${cdItem.fileName}.mp3`;
     return LOCAL_AUDIO[singleKey] || "";
@@ -141,42 +262,48 @@ export const PlaylistLayout = () => {
     setActiveSongIndex(0);
   }, [activeCd]);
 
-  // Show note rain + prepare autoplay AFTER cover finishes opening (~1.4s)
+  // Reset states when CD changes (start as closed/hidden)
   useEffect(() => {
-    if (activeCd !== null) {
-      setIsPlaying(false);
-      setCurrentTime(0);
-      setCoverOpen(false);
-      setShowMusicNoteRain(true);
-      shouldAutoPlayRef.current = false; // don't auto-play immediately
-      // Clear any previous timer
-      if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
-      // Wait for cover swing animation to finish before enabling autoplay
-      // tween(duration: 1.8s, delay: 0.2s) = 2.0s total + 200ms buffer
-      autoPlayTimerRef.current = setTimeout(() => {
-        setCoverOpen(true);
-        shouldAutoPlayRef.current = true;
-        // If audio is already ready (canPlay already fired), play now
-        const audio = audioRef.current;
-        if (audio && audio.readyState >= 3 && audio.src) {
-          audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
-          shouldAutoPlayRef.current = false;
-        }
-      }, 2200);
-      const noteTimer = setTimeout(() => setShowMusicNoteRain(false), 500);
-      return () => {
-        clearTimeout(noteTimer);
-        if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
-      };
-    } else {
-      setCoverOpen(false);
-      shouldAutoPlayRef.current = false;
-      setIsPlaying(false);
-      if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
+    setIsRevealed(false);
+    setCoverOpen(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    shouldAutoPlayRef.current = false;
+    if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
+
+    if (activeCd === null) {
       const audio = audioRef.current;
-      if (audio) { audio.pause(); audio.src = ""; }
+      if (audio) {
+        audio.pause();
+        audio.src = "";
+      }
     }
   }, [activeCd]);
+
+  // Click handler to open the CD cover, slide out booklet and play song
+  const handleReveal = () => {
+    if (isRevealed) return;
+    setIsRevealed(true);
+    setShowMusicNoteRain(true);
+    const noteTimer = setTimeout(() => setShowMusicNoteRain(false), 800);
+
+    const audio = audioRef.current;
+    if (audio) {
+      if (isValidAudioSrc(audio.src)) {
+        audio.play()
+          .then(() => setIsPlaying(true))
+          .catch((err) => {
+            console.error("Playback on reveal failed:", err);
+            setIsPlaying(false);
+          });
+      }
+    }
+
+    if (autoPlayTimerRef.current) clearTimeout(autoPlayTimerRef.current);
+    autoPlayTimerRef.current = setTimeout(() => {
+      setCoverOpen(true);
+    }, 2000);
+  };
 
   useEffect(() => {
     if (location.pathname !== "/playlist") setShowSplash(false);
@@ -318,8 +445,8 @@ export const PlaylistLayout = () => {
     })();
     return () => {
       destroyed = true;
-      try { inst?.three?.renderer?.dispose(); } catch (_) {}
-      try { el.innerHTML = ''; } catch (_) {}
+      try { inst?.three?.renderer?.dispose(); } catch (_) { }
+      try { el.innerHTML = ''; } catch (_) { }
     };
   }, [activeCd]);
 
@@ -334,6 +461,7 @@ export const PlaylistLayout = () => {
   };
 
   const currentCd = activeCd !== null ? cds.find(c => c.id === activeCd) || null : null;
+  console.log("PLAYLIST_LAYOUT: RENDER activeCd =", activeCd, "currentCd =", currentCd !== null);
 
   return (
     <motion.div
@@ -494,9 +622,11 @@ export const PlaylistLayout = () => {
       <AnimatePresence>
         {activeCd !== null && currentCd && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            key="cd-overlay-wrapper"
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md"
             style={{ backgroundColor: 'rgba(0,0,0,0.88)' }}
           >
@@ -514,35 +644,52 @@ export const PlaylistLayout = () => {
               <RotateCcw className="w-3.5 h-3.5" /> Eject CD ⏏️
             </motion.button>
 
+            {!isRevealed && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: [0.4, 1, 0.4], y: 0 }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 text-xs md:text-sm font-serif font-bold text-amber-500/90 uppercase tracking-widest flex items-center gap-2 pointer-events-none z-50 select-none text-center px-4"
+              >
+                <Sparkles className="w-4 h-4 animate-spin-slow" /> Click CD Cover to Open & Play 🎵
+              </motion.div>
+            )}
+
             <motion.div
               key={activeCd}
-              initial={{ scale: 0.88, y: 40, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.88, y: 40, opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
-              transition={{ type: "spring", stiffness: 120, damping: 19 }}
-              className="w-full max-w-[950px] bg-[#141211] rounded-2xl shadow-[0_35px_80px_rgba(0,0,0,0.85)] border border-stone-800 flex flex-col md:flex-row relative z-40"
+              variants={containerVariants}
+              custom={{ isMobile }}
+              initial="hidden"
+              animate={isRevealed ? "visibleOpen" : "visibleClosed"}
+              exit="exit"
+              onClick={handleReveal}
+              className={`w-full bg-[#141211] rounded-2xl shadow-[0_35px_80px_rgba(0,0,0,0.85)] border border-stone-800 flex flex-col md:flex-row relative z-40 overflow-hidden select-none transition-shadow duration-300 ${!isRevealed ? "cursor-pointer hover:shadow-[0_0_30px_rgba(168,85,247,0.25)] hover:border-purple-500/30" : ""}`}
               style={{
-                minHeight: "min(480px, 90svh)",
+                minHeight: isMobile ? "260px" : "min(480px, 90svh)",
                 perspective: "1200px",
                 transformStyle: "preserve-3d" as const,
               }}
             >
               {/* Spine divider */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-2.5 -ml-[5px] bg-[#1e1b18] border-x border-[#0e0c0b] shadow-[inset_0_0_8px_rgba(0,0,0,0.9)] z-20 pointer-events-none hidden md:block" />
+              <motion.div
+                animate={{ opacity: isRevealed ? 1 : 0 }}
+                transition={{ duration: 0.3, delay: isRevealed ? 1.5 : 0 }}
+                className="absolute left-1/2 top-0 bottom-0 w-2.5 -ml-[5px] bg-[#1e1b18] border-x border-[#0e0c0b] shadow-[inset_0_0_8px_rgba(0,0,0,0.9)] z-20 pointer-events-none hidden md:block"
+              />
 
               {/* ── 3D Cover Panel (swings open from left hinge) ────────── */}
               <motion.div
                 key={`cover-${activeCd}`}
-                initial={{ rotateY: 0 }}
-                animate={{ rotateY: -155 }}
-                exit={{ rotateY: 0 }}
-                transition={{ type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }}
+                variants={coverVariants}
+                animate={isRevealed ? "visibleOpen" : "visibleClosed"}
+                initial="hidden"
+                exit="exit"
                 style={{
                   transformOrigin: "left center",
                   transformStyle: "preserve-3d" as const,
                   position: "absolute",
                   left: 0, top: 0, bottom: 0,
-                  width: "50%",
+                  width: isMobile ? "100%" : "475px",
                   zIndex: 30,
                 }}
               >
@@ -597,10 +744,10 @@ export const PlaylistLayout = () => {
                   {/* Inner tray artwork on the back of lid */}
                   <div style={{ width: "8rem", height: "8rem", borderRadius: "50%", border: "2px solid rgba(168,85,247,0.2)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem", background: "radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%)" }}>
                     <svg viewBox="0 0 100 100" style={{ width: "60%", height: "60%", opacity: 0.15 }}>
-                      <circle cx="50" cy="50" r="48" fill="none" stroke="#a78bfa" strokeWidth="1.5"/>
-                      <circle cx="50" cy="50" r="35" fill="none" stroke="#a78bfa" strokeWidth="1"/>
-                      <circle cx="50" cy="50" r="20" fill="none" stroke="#a78bfa" strokeWidth="1"/>
-                      <circle cx="50" cy="50" r="6" fill="#a78bfa" opacity="0.3"/>
+                      <circle cx="50" cy="50" r="48" fill="none" stroke="#a78bfa" strokeWidth="1.5" />
+                      <circle cx="50" cy="50" r="35" fill="none" stroke="#a78bfa" strokeWidth="1" />
+                      <circle cx="50" cy="50" r="20" fill="none" stroke="#a78bfa" strokeWidth="1" />
+                      <circle cx="50" cy="50" r="6" fill="#a78bfa" opacity="0.3" />
                     </svg>
                   </div>
                   <span style={{ fontSize: "8px", color: "rgba(168,85,247,0.35)", letterSpacing: "0.2em", textTransform: "uppercase", fontFamily: "monospace" }}>JUST FOR YOU</span>
@@ -608,9 +755,10 @@ export const PlaylistLayout = () => {
 
                 {/* Dynamic shadow on the floor as the cover swings open */}
                 <motion.div
-                  initial={{ opacity: 0, scaleX: 0 }}
-                  animate={{ opacity: 0.4, scaleX: 1 }}
-                  transition={{ type: "tween", duration: 1.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }}
+                  variants={shadowVariants}
+                  animate={isRevealed ? "visibleOpen" : "visibleClosed"}
+                  initial="hidden"
+                  exit="exit"
                   style={{
                     position: "absolute",
                     bottom: "-12px",
@@ -627,14 +775,19 @@ export const PlaylistLayout = () => {
               {/* ─────────────────────────────────────────────────────────── */}
 
               {/* LEFT: Picture — CLICK TO PLAY/STOP */}
-              <div className="w-full md:w-1/2 flex flex-col relative overflow-hidden" style={{ minHeight: "240px" }}>
+              <div className="w-full md:w-[475px] md:min-w-[475px] shrink-0 flex flex-col relative overflow-hidden z-10" style={{ minHeight: "240px" }}>
                 {/* Full-bleed cover image */}
                 <img src={currentCd.image} alt={currentCd.name} className="absolute inset-0 w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
                 {/* THE PICTURE IS THE PLAY BUTTON — click anywhere on image to play/stop */}
                 <div
-                  onClick={togglePlay}
+                  onClick={(e) => {
+                    if (isRevealed) {
+                      e.stopPropagation();
+                      togglePlay();
+                    }
+                  }}
                   className="absolute inset-0 z-20 cursor-pointer flex items-center justify-center group"
                 >
                   {/* Big play/pause/loading indicator in centre */}
@@ -735,7 +888,7 @@ export const PlaylistLayout = () => {
                   {/* Frequency bars */}
                   <div className="flex gap-[3px] items-end h-8 bg-black/40 py-1 px-3 rounded-xl border border-white/10">
                     {Array.from({ length: 28 }).map((_, i) => {
-                      const delays = [0.1,0.4,0.2,0.5,0.1,0.3,0.6,0.2,0.5,0.3,0.1,0.4,0.2,0.5,0.1,0.3,0.6,0.2,0.5,0.3,0.1,0.4,0.2,0.5,0.1,0.3,0.6,0.2];
+                      const delays = [0.1, 0.4, 0.2, 0.5, 0.1, 0.3, 0.6, 0.2, 0.5, 0.3, 0.1, 0.4, 0.2, 0.5, 0.1, 0.3, 0.6, 0.2, 0.5, 0.3, 0.1, 0.4, 0.2, 0.5, 0.1, 0.3, 0.6, 0.2];
                       return (
                         <motion.div
                           key={i}
@@ -750,7 +903,14 @@ export const PlaylistLayout = () => {
               </div>
 
               {/* RIGHT: Liner Notes Booklet — NO playbar here */}
-              <div className="w-full md:w-1/2 bg-[#fcfaf4] relative flex flex-col overflow-y-auto rounded-b-2xl md:rounded-r-2xl md:rounded-bl-none">
+              <motion.div
+                variants={bookletVariants}
+                custom={{ isMobile }}
+                initial="hidden"
+                animate={isRevealed ? "visibleOpen" : "visibleClosed"}
+                exit="exit"
+                className="w-full md:w-[475px] md:min-w-[475px] shrink-0 bg-[#fcfaf4] relative flex flex-col overflow-y-auto rounded-b-2xl md:rounded-r-2xl md:rounded-bl-none z-5"
+              >
                 <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black/[0.08] to-transparent pointer-events-none z-10" />
                 <div className="absolute left-0 top-0 bottom-0 w-[1.5px] bg-white/70 shadow-[0_0_8px_rgba(255,255,255,1)] pointer-events-none z-10" />
 
@@ -758,7 +918,7 @@ export const PlaylistLayout = () => {
                 <div className="flex-1 flex flex-col justify-center items-center">
                   {activeCd === 0 ? <PlaylistCover /> : activeCd === OUTRO_ID ? <PlaylistEnd /> : <ScrapbookJournalPage pageNumber={activeCd} />}
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           </motion.div>
         )}
